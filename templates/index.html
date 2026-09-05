@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Based Movie Recommendation System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            color: #222;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 900px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        form {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+
+        input {
+            width: 350px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #222;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #444;
+        }
+
+        .result-title {
+            margin-bottom: 20px;
+        }
+
+        .movies {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            text-align: left;
+        }
+
+        .movie-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .movie-card h3 {
+            margin-top: 10px;
+            margin-bottom: 8px;
+        }
+
+        .movie-card p {
+            margin: 7px 0;
+            color: #666;
+        }
+
+        .not-found {
+            color: #d00;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            form {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            input {
+                width: 100%;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .movies {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .movie-poster {
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <h1>Movie Recommendation System</h1>
+
+        <p class="subtitle">
+            Enter a movie and get similar movie recommendations
+        </p>
+
+
+        <!-- Search Form -->
+
+        <form method="POST">
+
+            <input type="text" name="movie" list="movie-list" placeholder="Enter movie name..."
+                value="{{ selected_movie }}" autocomplete="off" required>
+
+            <datalist id="movie-list">
+
+                {% for movie in movie_titles %}
+                <option value="{{ movie }}">
+                    {% endfor %}
+
+            </datalist>
+
+
+            <button type="submit">
+                Recommend
+            </button>
+
+        </form>
+
+
+        <!-- Selected Movie -->
+
+        {% if selected_movie %}
+
+        <h2 class="result-title">
+            Recommendations for "{{ selected_movie }}"
+        </h2>
+
+        {% endif %}
+
+
+        <!-- Recommendations -->
+
+        {% if recommendations %}
+
+        <div class="movies">
+            {% for movie in recommendations %}
+
+            <div class="movie-card" data-movie-id="{{ movie.id }}">
+
+                <img class="movie-poster" src="" alt="{{ movie.title }} poster">
+                <h3>{{ movie.title }}</h3>
+                <p>⭐ Rating: {{ movie.rating }}</p>
+                <p>📅 Year: {{ movie.year }}</p>
+
+            </div>
+
+            {% endfor %}
+        </div>
+
+
+        {% elif selected_movie %}
+
+        <p class="not-found">
+            Movie not found. Please check the movie name.
+        </p>
+
+        {% endif %}
+
+
+    </div>
+
+
+    <script>
+        const TMDB_API_KEY = "304ca56b1b7b57ca7a47d9b59946be94";
+
+        const movieCards = document.querySelectorAll(".movie-card");
+
+        movieCards.forEach(async (card) => {
+
+            const movieId = card.dataset.movieId;
+            const poster = card.querySelector(".movie-poster");
+
+            try {
+
+                const response = await fetch(
+                    `https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}`
+                );
+
+                const movie = await response.json();
+
+                if (movie.poster_path) {
+
+                    poster.src =
+                        `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
+
+                } else {
+
+                    poster.src = "https://via.placeholder.com/300x450?text=No+Poster";
+
+                }
+
+            } catch (error) {
+
+                console.error("Poster error:", error);
+
+                poster.src =
+                    "https://via.placeholder.com/300x450?text=No+Poster";
+            }
+
+        });
+    </script>
+
+</body>
+
+</html>
