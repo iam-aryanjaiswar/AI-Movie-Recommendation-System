@@ -45,6 +45,14 @@ def recommend(movie_title):
     distances, indices = knn.kneighbors(movie_vector)
 
     recommendations = []
+    
+    recommendations.append({
+        "id": movies["movie_id"][movie_index],
+        "title": movies["title"][movie_index],
+        "rating": movies["vote_average"][movie_index],
+        "year": movies["year"][movie_index]
+    })
+
 
     for i in indices[0][1:]:
 
